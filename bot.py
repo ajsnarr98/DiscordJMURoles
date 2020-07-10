@@ -34,6 +34,12 @@ bot = commands.Bot(command_prefix=default_command_prefix,
 
 ### Utility Functions ###
 
+def all_empty_roles(guild: discord.Guild) -> iter:
+  """ Returns an interable containing all discord.Role objects in the guild that
+      do not have any members assigned to them.
+  """
+  return filter(lambda r: len(r.members) == 0, guild.roles)
+
 def is_grad_year(role: discord.Role) -> bool:
   """ Returns true if it is a graduation role, else false. """
   return re.match(r"(\d+) graduate", role.name.lower())
@@ -66,11 +72,16 @@ async def get_grad_year_role(guild: discord.Guild, year: int) -> discord.Role:
   role_name = '{} Graduate'.format(year)
   return await guild.create_role(name=role_name, mentionable=True, hoist=True,
     reason='Created new role for graduation year')
+    
+async def cleanup_empty_grad_year_roles(guild: discord.Guild):
+  """ Clears unused grad year roles in the given server. """
+  to_clear = filter(lambda r: is_grad_year(r), all_empty_roles(guild))
+  for role in to_clear:
+    await role.delete(reason='No users marked as this graduation year')
   
 async def set_grad_year(member: discord.Member, year: int, guild: discord.Guild):
   """ Add a role to the user for the graduation year. if such a role does
-      not yet exist, create a role for the year. Finally, clear unused graduation
-      year roles.
+      not yet exist, create a role for the year.
   """
   if year <= 0: 
     raise ValueError('Year cannot be <= 0')
@@ -82,8 +93,6 @@ async def set_grad_year(member: discord.Member, year: int, guild: discord.Guild)
   
   # set new roles for member
   await member.edit(roles=roles)
-  
-  # TODO - clear unused graduation year roles
 
 ### Event handlers ###
 
@@ -126,6 +135,9 @@ async def gradyear(ctx, year):
     return
   
   await set_grad_year(ctx.author, n_year, ctx.guild)
+  
+  # clear unused graduation year roles
+  await cleanup_empty_grad_year_roles(ctx.guild)
   
 
 if __name__ == '__main__':
