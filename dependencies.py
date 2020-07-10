@@ -1,5 +1,6 @@
 import os
-import pip
+import subprocess
+import sys
 
 pipDependencyFilename = 'pip_dependencies.txt'
 
@@ -12,10 +13,8 @@ def install():
 
     if dependencies:
         for package in dependencies:
-            try:
-                pip.main(['install', package])
-            except:
-                pass
+            subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+            
 
 def get_pip_dependencies():
     """ Returns a list of pip modules to install """
