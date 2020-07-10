@@ -55,6 +55,12 @@ async def on_command_error(ctx, exception):
     logger.error('Ignoring exception in command {}'.format(ctx.command))
     print('Ignoring exception in command {}'.format(ctx.command), file=sys.stderr)
     traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
+    
+@bot.event
+async def on_member_join(member):
+  # give a message on join
+  await member.send('How goes it <@{id}>?\n\nYou can use \'!gradyear <year>\' if you would like to set your grad year.'
+    .format(id=member.id))
 
 ### Commands ###
 
