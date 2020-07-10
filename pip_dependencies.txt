@@ -1,0 +1,3 @@
+GitPython
+discord.py
+requests
