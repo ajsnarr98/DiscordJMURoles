@@ -32,133 +32,6 @@ description = ''' A bot to fulfill your wildest dreams. '''
 bot = commands.Bot(command_prefix=default_command_prefix,
   description=description, pm_help=False)
 
-### Utility Functions ###
-
-def all_empty_roles(guild: discord.Guild) -> iter:
-  """ Returns an interable containing all discord.Role objects in the guild that
-      do not have any members assigned to them.
-  """
-  return filter(lambda r: len(r.members) == 0, guild.roles)
-  
-def is_color(role: discord.Role) -> bool:
-  """ Returns true if it is a color role, else false. """
-  return bool(re.match(r"color #......", role.name.lower()))
-  
-def get_color(role: discord.Role) -> str:
-  """ Returns the hex color if it is a graduation role, else None. """
-  if is_color(role):
-    return re.search(r"#......", role.name)[0][1:]
-  else:
-    return None
-
-async def get_color_role(guild: discord.Guild, color: str) -> discord.Role:
-  """ Retrieve the role matching a given hex color, or create a new role if
-      needed.
-      
-      Specify a color of None for the default color (None).
-  """
-  if type(color) != str and color is not None:
-    raise ValueError('Invalid type passed for color: {}'.format(type(color)))
-  
-  # if color is None, return None
-  if color is None:
-    return None
-  
-  # create a dict mapping colors (str) to existing roles (discord.Role)
-  colors = {}
-  for role in guild.roles:
-    role_color = get_color(role)
-    if role_color is not None:
-      colors[role_color] = role
-  
-  # if role exists, return it
-  if color in colors:
-    return colors[color]
-  
-  # otherwise, create new role
-  role_name = 'Color #{}'.format(color)
-  color = discord.Color(int(color, 16))
-  return await guild.create_role(name=role_name, mentionable=False, colour=color,
-    reason='Created new color role')
-
-async def cleanup_empty_color_roles(guild: discord.Guild):
-  """ Clears unused color roles in the given server. """
-  to_clear = filter(lambda r: is_color(r), all_empty_roles(guild))
-  for role in to_clear:
-    await role.delete(reason='No users using this color')
-    
-async def set_color(member: discord.Member, color: str, guild: discord.Guild):
-  """ Add a role to the user for the color. if such a role does
-      not yet exist, create a role for the year. If given color is None,
-      remove color roles from user to set them to default color.
-  """
-  if type(color) != str and color is not None:
-    raise ValueError('Invalid type passed for color: {}'.format(type(color)))
-  
-  roles = member.roles
-  roles = list(filter(lambda r: not is_color(r), roles)) # remove old color role
-  
-  if color is not None:
-    new_role = await get_color_role(guild, color)
-    roles.append(new_role) # add new color role
-  
-  # set new roles for member
-  await member.edit(roles=roles)
-
-def is_grad_year(role: discord.Role) -> bool:
-  """ Returns true if it is a graduation role, else false. """
-  return bool(re.match(r"(\d+) graduate", role.name.lower()))
-
-def get_grad_year(role: discord.Role) -> int:
-  """ Returns the year if it is a graduation role, else None. """
-  if is_grad_year(role):
-    return int(re.search(r"\d+", role.name)[0])
-  else:
-    return -1
-
-async def get_grad_year_role(guild: discord.Guild, year: int) -> discord.Role:
-  """ Retrieve the role matching a given year, or create a new role if needed.
-  """
-  if year <= 0:
-    raise ValueError('Year cannot be <= 0')
-  
-  # create a dict mapping years (int) to existing roles (discord.Role)
-  years = {}
-  for role in guild.roles:
-    role_year = get_grad_year(role)
-    if role_year is not None:
-      years[role_year] = role
-  
-  # if role exists, return it
-  if year in years:
-    return years[year]
-  
-  # otherwise, create new role
-  role_name = '{} Graduate'.format(year)
-  return await guild.create_role(name=role_name, mentionable=True, hoist=True,
-    reason='Created new role for graduation year')
-    
-async def cleanup_empty_grad_year_roles(guild: discord.Guild):
-  """ Clears unused grad year roles in the given server. """
-  to_clear = filter(lambda r: is_grad_year(r), all_empty_roles(guild))
-  for role in to_clear:
-    await role.delete(reason='No users marked as this graduation year')
-  
-async def set_grad_year(member: discord.Member, year: int, guild: discord.Guild):
-  """ Add a role to the user for the graduation year. if such a role does
-      not yet exist, create a role for the year.
-  """
-  if year <= 0: 
-    raise ValueError('Year cannot be <= 0')
-  
-  roles = member.roles
-  roles = list(filter(lambda r: not is_grad_year(r), roles)) # remove old grad year role
-  new_role = await get_grad_year_role(guild, year)
-  roles.append(new_role) # add new grad year role
-  
-  # set new roles for member
-  await member.edit(roles=roles)
-
 ### Event handlers ###
 
 @bot.event
@@ -284,7 +157,133 @@ async def gradyear(ctx, year):
   
   # clear unused graduation year roles
   await cleanup_empty_grad_year_roles(ctx.guild)
+
+### Utility Functions ###
+
+def all_empty_roles(guild: discord.Guild) -> iter:
+  """ Returns an interable containing all discord.Role objects in the guild that
+      do not have any members assigned to them.
+  """
+  return filter(lambda r: len(r.members) == 0, guild.roles)
   
+def is_color(role: discord.Role) -> bool:
+  """ Returns true if it is a color role, else false. """
+  return bool(re.match(r"color #......", role.name.lower()))
+  
+def get_color(role: discord.Role) -> str:
+  """ Returns the hex color if it is a graduation role, else None. """
+  if is_color(role):
+    return re.search(r"#......", role.name)[0][1:]
+  else:
+    return None
+
+async def get_color_role(guild: discord.Guild, color: str) -> discord.Role:
+  """ Retrieve the role matching a given hex color, or create a new role if
+      needed.
+      
+      Specify a color of None for the default color (None).
+  """
+  if type(color) != str and color is not None:
+    raise ValueError('Invalid type passed for color: {}'.format(type(color)))
+  
+  # if color is None, return None
+  if color is None:
+    return None
+  
+  # create a dict mapping colors (str) to existing roles (discord.Role)
+  colors = {}
+  for role in guild.roles:
+    role_color = get_color(role)
+    if role_color is not None:
+      colors[role_color] = role
+  
+  # if role exists, return it
+  if color in colors:
+    return colors[color]
+  
+  # otherwise, create new role
+  role_name = 'Color #{}'.format(color)
+  color = discord.Color(int(color, 16))
+  return await guild.create_role(name=role_name, mentionable=False, colour=color,
+    reason='Created new color role')
+
+async def cleanup_empty_color_roles(guild: discord.Guild):
+  """ Clears unused color roles in the given server. """
+  to_clear = filter(lambda r: is_color(r), all_empty_roles(guild))
+  for role in to_clear:
+    await role.delete(reason='No users using this color')
+    
+async def set_color(member: discord.Member, color: str, guild: discord.Guild):
+  """ Add a role to the user for the color. if such a role does
+      not yet exist, create a role for the year. If given color is None,
+      remove color roles from user to set them to default color.
+  """
+  if type(color) != str and color is not None:
+    raise ValueError('Invalid type passed for color: {}'.format(type(color)))
+  
+  roles = member.roles
+  roles = list(filter(lambda r: not is_color(r), roles)) # remove old color role
+  
+  if color is not None:
+    new_role = await get_color_role(guild, color)
+    roles.append(new_role) # add new color role
+  
+  # set new roles for member
+  await member.edit(roles=roles)
+
+def is_grad_year(role: discord.Role) -> bool:
+  """ Returns true if it is a graduation role, else false. """
+  return bool(re.match(r"(\d+) graduate", role.name.lower()))
+
+def get_grad_year(role: discord.Role) -> int:
+  """ Returns the year if it is a graduation role, else None. """
+  if is_grad_year(role):
+    return int(re.search(r"\d+", role.name)[0])
+  else:
+    return -1
+
+async def get_grad_year_role(guild: discord.Guild, year: int) -> discord.Role:
+  """ Retrieve the role matching a given year, or create a new role if needed.
+  """
+  if year <= 0:
+    raise ValueError('Year cannot be <= 0')
+  
+  # create a dict mapping years (int) to existing roles (discord.Role)
+  years = {}
+  for role in guild.roles:
+    role_year = get_grad_year(role)
+    if role_year is not None:
+      years[role_year] = role
+  
+  # if role exists, return it
+  if year in years:
+    return years[year]
+  
+  # otherwise, create new role
+  role_name = '{} Graduate'.format(year)
+  return await guild.create_role(name=role_name, mentionable=True, hoist=True,
+    reason='Created new role for graduation year')
+    
+async def cleanup_empty_grad_year_roles(guild: discord.Guild):
+  """ Clears unused grad year roles in the given server. """
+  to_clear = filter(lambda r: is_grad_year(r), all_empty_roles(guild))
+  for role in to_clear:
+    await role.delete(reason='No users marked as this graduation year')
+  
+async def set_grad_year(member: discord.Member, year: int, guild: discord.Guild):
+  """ Add a role to the user for the graduation year. if such a role does
+      not yet exist, create a role for the year.
+  """
+  if year <= 0: 
+    raise ValueError('Year cannot be <= 0')
+  
+  roles = member.roles
+  roles = list(filter(lambda r: not is_grad_year(r), roles)) # remove old grad year role
+  new_role = await get_grad_year_role(guild, year)
+  roles.append(new_role) # add new grad year role
+  
+  # set new roles for member
+  await member.edit(roles=roles)  
 
 if __name__ == '__main__':
   print()
