@@ -5,6 +5,8 @@ if __name__ == '__main__':
 import asyncio
 import logging
 import os
+import re
+import sys
 import traceback
 
 import discord
@@ -32,14 +34,64 @@ bot = commands.Bot(command_prefix=default_command_prefix,
 
 ### Utility Functions ###
 
+def is_grad_year(role: discord.Role) -> bool:
+  """ Returns true if it is a graduation role, else false. """
+  return re.match(r"(\d+) graduate", role.name.lower())
+
+def get_grad_year(role: discord.Role) -> int:
+  """ Returns the year if it is a graduation role, else -1. """
+  if is_grad_year(role):
+    return int(re.search(r"\d+", role.name)[0])
+  else:
+    return -1
+
+async def get_grad_year_role(guild: discord.Guild, year: int) -> discord.Role:
+  """ Retrieve the role matching a given year, or create a new role if needed.
+  """
+  if year <= 0:
+    raise ValueError('Year cannot be <= 0')
+  
+  # create a dict mapping years (int) to existing roles (discord.Role)
+  years = {}
+  for role in guild.roles:
+    role_year = get_grad_year(role)
+    if role_year > 0:
+      years[role_year] = role
+  
+  # if role exists, return it
+  if year in years:
+    return years[year]
+  
+  # otherwise, create new role
+  role_name = '{} Graduate'.format(year)
+  return await guild.create_role(name=role_name, mentionable=True, hoist=True,
+    reason='Created new role for graduation year')
+  
+async def set_grad_year(member: discord.Member, year: int, guild: discord.Guild):
+  """ Add a role to the user for the graduation year. if such a role does
+      not yet exist, create a role for the year. Finally, clear unused graduation
+      year roles.
+  """
+  if year <= 0: 
+    raise ValueError('Year cannot be <= 0')
+  
+  roles = member.roles
+  roles = list(filter(lambda r: not is_grad_year(r), roles)) # remove old grad year role
+  new_role = await get_grad_year_role(guild, year)
+  roles.append(new_role) # add new grad year role
+  
+  # set new roles for member
+  await member.edit(roles=roles)
+  
+  # TODO - clear unused graduation year roles
 
 ### Event handlers ###
 
 @bot.event
 async def on_connect():
-  logger.info('Connected!')
-  logger.info('Username: {}'.format(bot.user.name))
-  logger.info('ID: {}'.format(bot.user.id))
+  print('Connected!')
+  print('Username: {}'.format(bot.user.name))
+  print('ID: {}'.format(bot.user.id))
 
 @bot.event
 async def on_command_error(ctx, exception):
@@ -53,25 +105,30 @@ async def on_command_error(ctx, exception):
     await ctx.send(
       'Missing required argument. Please see \'{}help\'.'.format(default_command_prefix))
   else:
-    logger.error('Ignoring exception in command {}'.format(context.command))
-    print('Ignoring exception in command {}'.format(context.command), file=sys.stderr)
+    logger.error('Ignoring exception in command {}'.format(ctx.command))
+    print('Ignoring exception in command {}'.format(ctx.command), file=sys.stderr)
     traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
 
 ### Commands ###
 
 @bot.command()
 async def gradyear(ctx, year):
-  """ Set your graduation year. '!gradyear <year>' """
+  """ Usage: '!gradyear <year>'. Set your graduation year. """
   n_year = 0
   try:
     n_year = int(year)
   except ValueError:
     await ctx.send('\'{}\' is not a number'.format(year))
     return
+    
+  if n_year <= 0:
+    await ctx.send('Invalid year')
+    return
   
-  await ctx.send('hello')
+  await set_grad_year(ctx.author, n_year, ctx.guild)
   
 
 if __name__ == '__main__':
-  logger.info('connecting...')
+  print()
+  print('connecting...')
   bot.run(secret.botToken)
