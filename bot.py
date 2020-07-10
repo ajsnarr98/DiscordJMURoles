@@ -6,6 +6,7 @@ import asyncio
 import logging
 import os
 import re
+import requests
 import sys
 import traceback
 
@@ -163,6 +164,16 @@ async def gradyear(ctx, year):
   
   # clear unused graduation year roles
   await cleanup_empty_grad_year_roles(ctx.guild)
+  
+@bot.command(aliases=['chuck'])
+async def chucknorris(ctx):
+  """ Want to know some interesting Chuck Norris facts? """
+  joke_msg = '{joke}'
+
+  chuckPull = requests.get('http://api.icndb.com/jokes/random')
+  if chuckPull and chuckPull.status_code  == 200:
+    joke = chuckPull.json()['value']['joke']
+    await ctx.send(joke_msg.format(joke=joke))
 
 ### Utility Functions ###
 
