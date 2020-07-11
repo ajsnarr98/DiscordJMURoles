@@ -19,14 +19,19 @@ def check_for_updates():
 
 def restart(logger, seconds_before_restart=5):
     """ Waits a determined amount of time and then restarts
-        this program.y
+        this program.
     """
-    pre_wait_message = 'event loop has stopped... waiting {sec} seconds before restart'
+    pre_wait_message = 'event loop has stopped... restarting in {sec}'
     restarting_message = 'restarting bot...'
-
-    logger.debug(pre_wait_message.format(sec=seconds_before_restart))
-    time.sleep(seconds_before_restart)
+    
+    print()
+    while seconds_before_restart > 0:
+        print(pre_wait_message.format(sec=seconds_before_restart), end="\r")
+        time.sleep(1)
+        seconds_before_restart -= 1
+    
     logger.debug(restarting_message)
+    time.sleep(.5) # just small delay because print/log statements may now be part of a race condition
 
     python = sys.executable
     os.execl(python, python, *sys.argv)

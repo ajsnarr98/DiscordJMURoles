@@ -72,7 +72,17 @@ bot.add_cog(CommandColor(bot))
 bot.add_cog(CommandGradYear(bot))
 bot.add_cog(MiscFun(bot))
 
+@bot.command(aliases=['restart'])
+async def update(ctx):
+  """ Checks for updates from git, and restarts bot. """
+  self_updater.check_for_updates()
+  print('update started. stopping event loop...')
+  raise KeyboardInterrupt() # kill program (gets caught by discord lib)
+
 if __name__ == '__main__':
   print()
   print('connecting...')
   bot.run(secret.botToken)
+    
+  # finally, after event loop terminated
+  self_updater.restart(logger)
