@@ -37,7 +37,9 @@ description = ''' A bot to fulfill your wildest dreams. '''
 bot = commands.Bot(command_prefix=default_command_prefix,
   description=description, pm_help=False, help_command=StraightforwardHelp())
 
+######################
 ### Event handlers ###
+######################
 
 @bot.event
 async def on_connect():
@@ -84,7 +86,9 @@ async def on_member_join(member):
    'You can use \'!gradyear <year>\' if you would like to set your grad year.' +
    ' Use \'!help\' for more commands')
 
+################
 ### Commands ###
+################
 
 bot.add_cog(CommandColor(bot))
 bot.add_cog(CommandGradYear(bot))
