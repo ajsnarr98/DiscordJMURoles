@@ -11,5 +11,5 @@ __version__ = '1.0'
 
 __all__ = ['commands']
 
-from util import all_empty_roles
+import util
 import commands
