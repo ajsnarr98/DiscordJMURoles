@@ -11,3 +11,4 @@ from .CommandColor import CommandColor
 from .CommandGradYear import CommandGradYear
 from .CommandHelp import StraightforwardHelp
 from .MiscFun import MiscFun
+from .UpdateChecker import UpdateChecker

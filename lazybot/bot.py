@@ -16,7 +16,7 @@ from discord.ext import commands
 
 import secret
 import self_updater
-from commands import CommandColor, CommandGradYear, MiscFun, StraightforwardHelp
+from commands import CommandColor, CommandGradYear, MiscFun, StraightforwardHelp, UpdateChecker
 
 # set up logger
 log_filename = 'discord.log'
@@ -72,10 +72,13 @@ bot.add_cog(CommandColor(bot))
 bot.add_cog(CommandGradYear(bot))
 bot.add_cog(MiscFun(bot))
 
+bot.add_cog(UpdateChecker(bot))
+
 @bot.command(aliases=['restart'])
 async def update(ctx):
   """ Checks for updates from git, and restarts bot. """
-  self_updater.check_for_updates()
+  self_updater.check_for_updates() # update checker probably already updated, but just make sure
+  await ctx.send('restarting...')
   print('update started. stopping event loop...')
   raise KeyboardInterrupt() # kill program (gets caught by discord lib)
 
