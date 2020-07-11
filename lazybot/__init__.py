@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
 """
-JMURoleChange Discord Bot
+LazyBot
 ~~~~~~~~~~~~~~~~~~~
 A bot account for conveniently changing roles in Discord chat client.
 """
 
-__title__ = 'jmurolechange'
 __author__ = 'ajsnarr98'
 __version__ = '1.0'
 
-from .bot import DiscordBot
+__all__ = ['commands']
+
+from util import all_empty_roles
+import commands
