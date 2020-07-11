@@ -16,12 +16,6 @@ class UpdateChecker(commands.Cog):
   def cog_unload(self):
     self.update_reminder.cancel()
     self.update_check.cancel()
-    
-  @commands.command()
-  async def notify(self, ctx):
-    await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
-      name='Update Available'))
-    await self.notify_about_update()
   
   async def notify_about_update(self):
     """ Sends a message to all channels about needing to update. """
