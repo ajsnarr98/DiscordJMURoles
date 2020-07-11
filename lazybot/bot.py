@@ -16,7 +16,7 @@ from discord.ext import commands
 
 import secret
 import self_updater
-from commands import CommandColor, CommandGradYear, MiscFun
+from commands import CommandColor, CommandGradYear, MiscFun, StraightforwardHelp
 
 # set up logger
 log_filename = 'discord.log'
@@ -33,7 +33,7 @@ default_command_prefix = '!'
 
 description = ''' A bot to fulfill your wildest dreams. '''
 bot = commands.Bot(command_prefix=default_command_prefix,
-  description=description, pm_help=False, help_command=commands.DefaultHelpCommand())
+  description=description, pm_help=False, help_command=StraightforwardHelp())
 
 ### Event handlers ###
 
