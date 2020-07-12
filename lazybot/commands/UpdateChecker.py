@@ -41,7 +41,7 @@ class UpdateChecker(commands.Cog):
       await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
         name='Update Available'))
       
-  @tasks.loop(seconds=15.0)
+  @tasks.loop(seconds=3600.0)
   async def update_reminder(self):
     if self.has_update:
       await self.notify_about_update()
