@@ -13,7 +13,7 @@ class CommandGradYear(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
   
-  @commands.command()
+  @commands.command(aliases=['graduate', 'grad'])
   async def gradyear(self, ctx, year):
     """ Usage: '!gradyear <year>'. Set your graduation year. """
     n_year = 0
