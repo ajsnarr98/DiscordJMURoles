@@ -28,7 +28,11 @@ async def say_in_all(bot: discord.ext.commands.Bot, *args, **kwargs):
               channel.send(*args, **kwargs)
       Has a preference towards a text channel called 'general',
       where letter case does not matter.
+      
+      returns::
+        A list of all sent messages.
   """
+  sent_msgs = []
   for guild in bot.guilds:
     general_channel = None
     # look for text channel with name 'general'
@@ -37,12 +41,15 @@ async def say_in_all(bot: discord.ext.commands.Bot, *args, **kwargs):
         general_channel = channel
         break
     if general_channel is not None:
-      await general_channel.send(*args, **kwargs)
+      msg = await general_channel.send(*args, **kwargs)
+      sent_msgs.append(msg)
     else:
       # if cannot find 'general', send to the first text channel
       for channel in guild.text_channels:
-        await channel.send(*args, **kwargs)
+        msg = await channel.send(*args, **kwargs)
+        sent_msgs.append(msg)
         break
+  return sent_msgs
       
 def static_vars(**kwargs):
   """ Decorator that allows static variables in a function. """

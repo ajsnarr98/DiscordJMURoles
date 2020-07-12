@@ -94,12 +94,14 @@ bot.add_cog(CommandColor(bot))
 bot.add_cog(CommandGradYear(bot))
 bot.add_cog(MiscFun(bot))
 
-bot.add_cog(UpdateChecker(bot))
+update_checker = UpdateChecker(bot)
+bot.add_cog(update_checker)
 
 @bot.command(aliases=['restart'])
 async def update(ctx):
   """ Checks for updates from git, and restarts bot. """
   self_updater.check_for_updates() # update checker probably already updated, but just make sure
+  await update_checker.clear_update_messages()
   await ctx.send('restarting...')
   await ctx.message.delete()
   print('update started. stopping event loop...')

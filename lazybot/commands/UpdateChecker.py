@@ -12,14 +12,25 @@ class UpdateChecker(commands.Cog):
     self.update_reminder.start()
     self.update_check.start()
     self.has_update = False
+    self.sent_msgs = []
     
   def cog_unload(self):
     self.update_reminder.cancel()
     self.update_check.cancel()
   
+  async def clear_update_messages(self):
+    """ Clears all remembered update messages. """
+    for msg in self.sent_msgs:
+      try:
+        await msg.delete()
+      except discord.NotFound:
+        pass
+    self.sent_msgs = []
+  
   async def notify_about_update(self):
     """ Sends a message to all channels about needing to update. """
-    await say_in_all(self.bot, 'Update is available. Run \'!update\' to complete.')
+    await self.clear_update_messages()
+    self.sent_msgs += await say_in_all(self.bot, 'Update is available. Run \'!update\' to complete.')
   
   @tasks.loop(seconds=60.0)
   async def update_check(self):
@@ -30,7 +41,7 @@ class UpdateChecker(commands.Cog):
       await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
         name='Update Available'))
       
-  @tasks.loop(seconds=3600.0)
+  @tasks.loop(seconds=15.0)
   async def update_reminder(self):
     if self.has_update:
       await self.notify_about_update()
