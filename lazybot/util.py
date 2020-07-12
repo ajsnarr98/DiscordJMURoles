@@ -1,7 +1,7 @@
 """ Utility functions for different parts of discord bot. """
 
 import datetime
-from typing import Union
+from typing import Callable, Union
 
 import discord
 
@@ -19,6 +19,18 @@ async def all_my_messages_since(bot: discord.ext.commands.Bot, since: Union[disc
         # if author was the bot
         if msg.author == guild.me:
           yield msg
+          
+async def purge_in_all(
+  bot: discord.ext.commands.Bot,
+  since: Union[discord.abc.Snowflake, datetime.datetime],
+  check: Callable[[discord.Message], bool] =None):
+  """ Purges all messages since the given time that meet the given check.
+      
+      If no check is given, purge all messages
+  """
+  for guild in bot.guilds:
+    for channel in guild.text_channels:
+      await channel.purge(limit=None, after=since, oldest_first=False, check=check)
 
 async def say_in_all(bot: discord.ext.commands.Bot, *args, **kwargs):
   """ A helper function that is equivalent to doing

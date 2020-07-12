@@ -30,11 +30,16 @@ handler = logging.FileHandler(filename=log_filename, encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
-# set up bot
-default_command_prefix = '!'
+#################
+### Constants ###
+#################
 
+RESTART_MSG = 'restarting...'
+DEFAULT_COMMAND_PREFIX = '!'
+
+# set up bot
 description = ''' A bot to fulfill your wildest dreams. '''
-bot = commands.Bot(command_prefix=default_command_prefix,
+bot = commands.Bot(command_prefix=DEFAULT_COMMAND_PREFIX,
   description=description, pm_help=False, help_command=StraightforwardHelp())
 
 ######################
@@ -56,15 +61,10 @@ async def on_ready():
     on_ready.is_first_call = False
     
     # remove a "restarting..." message to show bot has finished restarting
-    to_delete = 'restarting...'
     last_minute = datetime.datetime.now() - datetime.timedelta(minutes=1)
-    async for msg in util.all_my_messages_since(bot, last_minute):
-      if msg.content.lower() == to_delete:
-        try:
-          await msg.delete()
-        except discord.NotFound:
-          pass
-        break
+    def delete_check(msg: discord.Message) -> bool:
+      return msg.author == bot.user and msg.content.lower() == RESTART_MSG.lower()
+    await util.purge_in_all(bot, since=last_minute, check=delete_check)
 
 @bot.event
 async def on_command_error(ctx, exception):
@@ -105,7 +105,7 @@ async def update(ctx):
   """ Checks for updates from git, and restarts bot. """
   self_updater.check_for_updates() # update checker probably already updated, but just make sure
   await update_checker.clear_update_messages()
-  await ctx.send('restarting...')
+  await ctx.send(RESTART_MSG)
   await ctx.message.delete()
   print('update started. stopping event loop...')
   raise KeyboardInterrupt() # kill program (gets caught by discord lib)
