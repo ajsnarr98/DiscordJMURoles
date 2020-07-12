@@ -60,7 +60,10 @@ async def on_ready():
     last_minute = datetime.datetime.now() - datetime.timedelta(minutes=1)
     async for msg in util.all_my_messages_since(bot, last_minute):
       if msg.content.lower() == to_delete:
-        await msg.delete()
+        try:
+          await msg.delete()
+        except discord.NotFound:
+          pass
         break
 
 @bot.event
