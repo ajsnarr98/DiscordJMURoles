@@ -6,10 +6,10 @@ LazyBot
 A bot account for conveniently changing roles in Discord chat client.
 """
 
-__author__ = 'ajsnarr98'
-__version__ = '1.0'
+__author__ = "ajsnarr98"
+__version__ = "1.0"
 
-__all__ = ['commands']
+__all__ = ["commands"]
 
 import util
 import commands
