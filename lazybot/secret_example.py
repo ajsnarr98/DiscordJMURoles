@@ -1,1 +1,1 @@
-botToken = '<YOUR BOT TOKEN GOES HERE>'
+botToken = "<YOUR BOT TOKEN GOES HERE>"
