@@ -19,13 +19,8 @@ from discord.ext import commands
 import secret
 import self_updater
 import util
-from commands import (
-    CommandColor,
-    CommandGradYear,
-    MiscFun,
-    StraightforwardHelp,
-    UpdateChecker,
-)
+from bot_help import StraightforwardHelp
+from commands import all_commands
 
 # set up logger
 log_filename = "discord.log"
@@ -95,7 +90,7 @@ async def on_command_error(ctx, exception):
     elif type(exception) == commands.errors.MissingRequiredArgument:
         await ctx.send(
             "Missing required argument. Please see '{}help'.".format(
-                default_command_prefix
+                DEFAULT_COMMAND_PREFIX
             )
         )
     else:
@@ -120,11 +115,10 @@ async def on_member_join(member):
 ### Commands ###
 ################
 
-bot.add_cog(CommandColor(bot))
-bot.add_cog(CommandGradYear(bot))
-bot.add_cog(MiscFun(bot))
+for command in all_commands:
+    bot.add_cog(command(bot))
 
-update_checker = UpdateChecker(bot)
+update_checker = self_updater.UpdateChecker(bot)
 bot.add_cog(update_checker)
 
 
