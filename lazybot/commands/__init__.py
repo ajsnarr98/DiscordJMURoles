@@ -12,15 +12,15 @@ import os
 import sys
 import types
 
-import importlib.util
 from importlib.machinery import SourceFileLoader
+from typing import List
 
 from discord.ext.commands import Cog
 
-_COMMANDS = []
+_COMMANDS: List[Cog] = []
 
 
-def all_commands():
+def all_commands() -> List[Cog]:
     """
     Provide a copy of the list of commands.
     """
@@ -48,7 +48,7 @@ def load_commands():
 
         try:
             loader = SourceFileLoader(f"{__name__}.{modname}", path)
-            command_module = type.ModuleType(loader.name)
+            command_module = types.ModuleType(loader.name)
             loader.exec_module(command_module)
         except (ImportError, SyntaxError) as import_error:
             print(
@@ -61,7 +61,7 @@ def load_commands():
                 getattr(command_module, content_name)
                 for content_name in dir(command_module)
             ]
-            _COMMANDS.append(
+            _COMMANDS.extend(
                 {
                     command_class
                     for command_class in module_contents
@@ -70,7 +70,7 @@ def load_commands():
             )
 
 
-def _is_loaded_subclass(test_class, parent):
+def _is_loaded_subclass(test_class: type, parent: type) -> bool:
     """
     Checks whether the given class is a subclass of the given parent class
     and determines whether it looks like the class was loaded through

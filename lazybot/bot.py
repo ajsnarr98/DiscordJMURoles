@@ -115,7 +115,7 @@ async def on_member_join(member):
 ### Commands ###
 ################
 
-for command in all_commands:
+for command in all_commands():
     bot.add_cog(command(bot))
 
 update_checker = self_updater.UpdateChecker(bot)
